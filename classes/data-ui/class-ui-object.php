@@ -9,9 +9,9 @@ use Data_UI\Services\Service;
  * Class UI
  *
  * @package UI_Object
- * @property string      $service_id    The unique service ID.
- * @property array       $service_hooks The service specific event subscriptions.
- * @property-read string $slug          The objects slug.
+ * @property string $service_id    The unique service ID.
+ * @property array  $service_hooks The service specific event subscriptions.
+ * @property string $slug          The objects slug.
  */
 abstract class UI_Object {
 
@@ -23,56 +23,40 @@ abstract class UI_Object {
     public $params = array();
 
     /**
-     * Holds the objects services.
+     * Holds the attached objects.
      *
-     * @var Service[]
+     * @var UI_Object[]
      */
-    protected $services = array();
+    protected $objects = array();
 
     /**
      * UI Object constructor.
      *
      * @param string $slug The object slug.
      */
-    public function __construct( $slug ) {
+    public function __construct( $slug = null ) {
         $this->slug = $slug;
-        $this->init();
         $this->setup_hooks();
-    }
-
-    /**
-     * Setup events.
-     */
-    public function setup_events( $hooks ) {
-        foreach ( $hooks as $hook ) {
-            add_action( $hook, array( $this, 'event_' . $hook ), PHP_INT_MAX );
-        }
-    }
-
-    /**
-     * Call method.
-     *
-     * @param string $name
-     * @param array  $arguments
-     */
-    public function __call( string $name, array $arguments ) {
-        if ( false !== strpos( $name, 'event_' ) && $this->service_id ) {
-            do_action( $this->service_id, array( substr( $name, 6 ), $this ) );
-        }
+        $this->init();
     }
 
     /**
      * Setup hooks.
      */
     public function setup_hooks() {
-
+        add_action( 'admin_init', array( $this, 'admin_init' ) );
     }
 
     /**
      * Init object.
      */
     protected function init() {
+    }
 
+    /**
+     * Admin Init.
+     */
+    public function admin_init() {
     }
 
     /**
@@ -92,7 +76,7 @@ abstract class UI_Object {
      *
      * @return mixed
      */
-    public function __get( string $name ) {
+    public function __get( $name ) {
         return isset( $this->params[ $name ] ) ? $this->params[ $name ] : null;
     }
 
@@ -110,5 +94,27 @@ abstract class UI_Object {
                 add_action( $hook, array( $dispatch, $event ) );
             }
         }
+    }
+
+    /**
+     * Render the UI Object.
+     */
+    public function render() {
+        $this->ui->render();
+    }
+
+    /**
+     * Attach an object.
+     *
+     * @param $object
+     *
+     * @return UI_Object
+     */
+    public function attach( $object ) {
+        if ( $object instanceof UI_Object && ! in_array( $object, $this->objects, true ) ) {
+            $this->objects[] = $object;
+        }
+
+        return $object;
     }
 }

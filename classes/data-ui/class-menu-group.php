@@ -2,83 +2,70 @@
 
 namespace Data_UI;
 
+use Data_UI\UI\Components\Component\Base;
+use Data_UI\UI\Components\Component\Element;
+
 /**
  * Class Menu Group
  *
  * @package Data_UI
- * @property string          $group_title The group title shown on the menu.
- * @property string          $capability  The capability to access the group.
- * @property string          $icon        The URL or dashicon to use on the menu.
- * @property string|callable $callback    The callback to render the page.
- * @property int             $position    The group position on the menu.
+ * @property string $menu_title  The title shown on the menu.
+ * @property string $capability  The capability to access the group.
+ * @property string $icon        The URL or dashicon to use on the menu.
+ * @property int    $position    The group position on the menu.
  */
-class Menu_Group extends UI_Object {
+class Menu_Group extends Page {
 
     /**
-     * Holds the page handle.
+     * Holds the objects Params.
      *
-     * @var string
+     * @var array
      */
-    protected $handle;
+    public $params = array(
+        'menu_title' => '',
+        'capability' => 'manage_options',
+        'icon'       => 'dashicons-table-row-before',
+        'position'   => null,
+    );
 
     /**
-     * Holds the sub pages.
-     *
-     * @var \Data_UI\Page[]
+     * Init the object.
      */
-    protected $pages = array();
+    public function init() {
 
-    /**
-     * Setup hooks.
-     */
-    public function setup_hooks() {
-        add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+        $notice          = new Notice();
+        $notice->level   = 'warning';
+        $notice->message = 'Add pages to menu.';
+        $notice->dismiss = true;
+        $this->ui->add_component( $notice );
+        $this->callback = array( $this, 'render' );
     }
 
     /**
      * Add menu group to the admin menu.
      */
     public function admin_menu() {
-        $slug         = ! is_null( $this->slug ) ? $this->slug : sanitize_title( $this->group_title );
-        $this->handle = add_menu_page( $this->group_title, $this->group_title, $this->capability, $slug, $this->callback, $this->icon, $this->position );
+        $this->page_hook = add_menu_page( $this->page_title, $this->menu_title, $this->capability, $this->slug, $this->callback, $this->icon, $this->position );
     }
 
     /**
      * Add a page to the menu group.
      *
-     * @param      $page_title
-     * @param      $menu_title
-     * @param      $capability
-     * @param null $slug
-     * @param int  $position
+     * @param \Data_UI\Page $page The page object to attach.
      *
      * @return \Data_UI\Page
      */
-    public function add_page( $slug, $page_title, $menu_title, $capability = null, $position = 10 ) {
-        if ( ! isset( $this->pages[ $slug ] ) ) {
-            $this->setup_parent_page( $slug, $menu_title, $capability );
-            $page                 = new Page( $slug );
-            $page->parent_slug    = $this->slug;
-            $page->page_title     = $page_title;
-            $page->menu_title     = $menu_title;
-            $page->capability     = ! is_null( $capability ) ? $capability : $this->capability; // Inherit.
-            $page->position       = $position;
-            $this->pages[ $slug ] = $page;
+    public function attach( $page ) {
+        if ( $page instanceof Page ) {
+            $page->parent = $this->slug;
+            if ( is_null( $this->page_title ) ) {
+                // Leaving the menu title null, inherits from the first page attached.
+                $this->page_title = $page->page_title;
+                $page->slug       = $this->slug;
+            }
+            parent::attach( $page );
         }
 
-        return $this->pages[ $slug ];
-    }
-
-    /**
-     * Setup the group to match the first.
-     *
-     * @param $slug
-     * @param $menu_title
-     * @param $capability
-     */
-    protected function setup_parent_page( $slug, $menu_title, $capability ) {
-        $this->slug        = $this->slug ? $this->slug : $slug;
-        $this->group_title = $this->group_title ? $this->group_title : $menu_title;
-        $this->capability  = $this->capability ? $this->capability : $capability;
+        return $page;
     }
 }

@@ -5,6 +5,8 @@
  * @package data_ui
  */
 
+use Data_UI\UI;
+
 /**
  * Data_UI Class.
  */
@@ -32,11 +34,11 @@ class Data_UI {
     const VERSION_KEY = '_data_ui_version';
 
     /**
-     * Holds registered UI Instances.
+     * Holds all registered namespaced UI Instances.
      *
-     * @var \UI[]
+     * @var UI
      */
-    protected $ui_objects = array();
+    protected $namespaces = array();
 
     /**
      * Initiate the data_ui object.
@@ -45,7 +47,7 @@ class Data_UI {
         require_once ABSPATH . 'wp-admin/includes/plugin.php';
         $plugin        = get_file_data( DATAUI_CORE, array( 'Version' ), 'plugin' );
         $this->version = array_shift( $plugin );
-        spl_autoload_register( array( $this, 'data_ui_autoload_class' ), true, false );
+        spl_autoload_register( array( $this, 'autoloader' ), true, false );
 
         // Start hooks.
         $this->setup_hooks();
@@ -66,7 +68,7 @@ class Data_UI {
      * @param string $class class name to be checked and autoloaded.
      */
 
-    function data_ui_autoload_class( $class ) {
+    public function autoloader( $class ) {
 
         if ( false === strpos( $class, __CLASS__ . '\\' ) ) {
             return;
@@ -125,10 +127,8 @@ class Data_UI {
     public function data_ui_init() {
         // Check version.
         $this->check_version();
-
-        // @todo Plugin init code.
         /**
-         * Init the settings system
+         * Init the system
          *
          * @param Data_UI ${slug} The core object.
          */
@@ -139,7 +139,12 @@ class Data_UI {
      * Hook into admin_init.
      */
     public function admin_init() {
-        $a = 1;
+        /**
+         * Init the admin system
+         *
+         * @param Data_UI ${slug} The core object.
+         */
+        do_action( 'admin_data_ui_init' );
     }
 
     /**
@@ -151,17 +156,17 @@ class Data_UI {
     /**
      * Register a new ui object.
      *
-     * @param $slug
+     * @param string $namespace The namespace/slug to regester a new UI Object.
      *
      * @return UI
      */
-    public static function register( $slug ) {
+    public static function register( $namespace ) {
         $instance = self::get_instance();
-        if ( ! isset( $instance->ui_objects[ $slug ] ) ) {
-            $instance->ui_objects[ $slug ] = new Data_UI\UI( $instance );
+        if ( ! isset( $instance->namespaces[ $namespace ] ) ) {
+            $instance->namespaces[ $namespace ] = new UI( $instance );
         }
 
-        return $instance->ui_objects[ $slug ];
+        return $instance->namespaces[ $namespace ];
     }
 
     /**
