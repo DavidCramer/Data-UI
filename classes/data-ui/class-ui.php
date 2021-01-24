@@ -61,7 +61,7 @@ class UI {
      * @param string $icon
      * @param int    $position
      *
-     * @return \Data_UI\Menu_Group
+     * @return \Data_UI\Admin_Bar_Node
      */
     public function admin_bar_node( $slug, $group_title = null, $capability = null, $icon = null, $position = 100 ) {
         if ( ! isset( $this->admin_bar_nodes[ $slug ] ) ) {
