@@ -8,7 +8,10 @@ use Data_UI\Page;
  * Class UI
  *
  * @package Data_UI
- * @property-read Page $page      The page connected to.
+ * @property Page     $page              The page connected to.
+ * @property string   $description       The description of the store.
+ * @property callable $sanitize_callback The callback function for this data store.
+ * @property bool     $show_in_rest      Flag if this is available in REST API.
  */
 class Datastore extends Service {
 
@@ -37,7 +40,7 @@ class Datastore extends Service {
     }
 
     /**
-     * @param $object
+     * Init the data.
      */
     public function init_data() {
 
@@ -59,24 +62,20 @@ class Datastore extends Service {
         );
         register_setting( $this->page->page_hook, $this->slug, $args );
         add_settings_section( $this->slug, $this->page->page_title, array( $this->page, 'render' ), $this->page->page_hook );
-        //add_action( $this->page->page_hook, array( $this, 'init_option_form' ) );
-        //remove_action( $this->page->page_hook, array( $this->page, 'render' ) );
     }
 
-    public function init_option_form( $a ) {
-        do_settings_sections( $this->page->page_hook );
-        $this->page->render();
-
-    }
-
+    /**
+     * Initialize submission.
+     */
     public function init_submission() {
 
         add_action( 'admin_action_update', array( $this, 'capture_submission' ) );
     }
 
+    /**
+     * Capture submission data.
+     */
     public function capture_submission() {
-        //var_dump( $_POST );
-        //die;
     }
 
     /**

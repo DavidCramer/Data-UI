@@ -2,9 +2,6 @@
 
 namespace Data_UI;
 
-use Data_UI\UI\Components\Component\Base;
-use Data_UI\UI\Components\Component\Element;
-
 /**
  * Class Menu Group
  *
@@ -29,10 +26,9 @@ class Menu_Group extends Page {
     );
 
     /**
-     * Init the object.
+     * Setup "no pages" notice.
      */
-    public function init() {
-
+    public function default_notice() {
         $notice          = new Notice();
         $notice->level   = 'warning';
         $notice->message = 'Add pages to menu.';
@@ -46,6 +42,10 @@ class Menu_Group extends Page {
      */
     public function admin_menu() {
         $this->page_hook = add_menu_page( $this->page_title, $this->menu_title, $this->capability, $this->slug, $this->callback, $this->icon, $this->position );
+        // Add "no pages" notice if no pages added.
+        if ( empty( $this->objects ) ) {
+            $this->default_notice();
+        }
     }
 
     /**
@@ -67,5 +67,14 @@ class Menu_Group extends Page {
         }
 
         return $page;
+    }
+
+    /**
+     * Render only if empty, so that notification about adding pages can be displayed.
+     */
+    public function render() {
+        if ( empty( $this->objects ) ) {
+            parent::render();
+        }
     }
 }

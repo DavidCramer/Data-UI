@@ -25,6 +25,13 @@ abstract class Service {
     protected $service_id;
 
     /**
+     * Holds the service slug.
+     *
+     * @var string
+     */
+    protected $slug;
+
+    /**
      * Holds the services subscribable hooks.
      *
      * @var array
@@ -166,10 +173,5 @@ abstract class Service {
      */
     protected function is_param_required( $name ) {
         return in_array( $name, $this->required_params, true );
-    }
-
-    protected function get_location() {
-        $screen = get_current_screen();
-
     }
 }

@@ -1,13 +1,23 @@
 <?php
+/**
+ * Helper parser for automating component creation.
+ */
 
 namespace Data_UI\UI;
 
-use Data_UI\UI\Component\Component;
+use \Data_UI\UI\Components\Component;
 
+/**
+ * Class Blueprint_Parser
+ *
+ * @package Data_UI\UI
+ */
 class Blueprint_Parser {
 
     /**
+     * Holds the components being parsed.
      *
+     * @var Component[]
      */
     protected $components = array();
 
@@ -15,6 +25,8 @@ class Blueprint_Parser {
      * Compile a structure from a blueprint.
      *
      * @param $blueprint
+     *
+     * @return array
      */
     public function compile( $blueprint ) {
         $build_parts = explode( '|', $blueprint );

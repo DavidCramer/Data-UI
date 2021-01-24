@@ -97,13 +97,6 @@ abstract class UI_Object {
     }
 
     /**
-     * Render the UI Object.
-     */
-    public function render() {
-        $this->ui->render();
-    }
-
-    /**
      * Attach an object.
      *
      * @param $object

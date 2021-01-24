@@ -113,7 +113,7 @@ class Data_UI {
     protected function check_version() {
         $previous_version = get_option( self::VERSION_KEY, 0.0 );
         $new_version      = $this->version();
-        if ( version_compare( $previous_version, $new_version, '<' ) ) {
+        if ( $previous_version && version_compare( $previous_version, $new_version, '<' ) ) {
             // Allow for updating.
             do_action( "_data_ui_version_upgrade", $previous_version, $new_version );
             // Update version.
@@ -163,7 +163,7 @@ class Data_UI {
     public static function register( $namespace ) {
         $instance = self::get_instance();
         if ( ! isset( $instance->namespaces[ $namespace ] ) ) {
-            $instance->namespaces[ $namespace ] = new UI( $instance );
+            $instance->namespaces[ $namespace ] = new UI();
         }
 
         return $instance->namespaces[ $namespace ];

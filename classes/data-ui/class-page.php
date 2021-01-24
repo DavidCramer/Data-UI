@@ -20,7 +20,7 @@ class Page extends Screen {
     /**
      * Holds the page hook.
      *
-     * @var string
+     * @var string|false
      */
     protected $page_hook;
 
@@ -30,7 +30,7 @@ class Page extends Screen {
      * @var array
      */
     public $params = array(
-        'parent' => 'index.php',
+        'parent' => 'admin.php',
         'capability' => 'manage_options',
     );
 

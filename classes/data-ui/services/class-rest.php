@@ -9,32 +9,26 @@ namespace Data_UI\Services;
  */
 class Rest extends Service {
 
-    protected $object;
     /**
-     * UI constructor.
+     * Method called to register service hooks.
      */
-    public function __construct() {
-        $this->register_service_hook( 'rest_api_init', array( $this, 'init_rest' ) );
+    protected function service_hooks() {
+        $this->register_service_action( 'init', 'init_service', 10, 1 );
     }
 
     /**
-     * @param $object
+     * Connect rest to object.
+     *
+     * @param Object $object Object to connect.
      */
-    public function init_rest( $object ) {
-        $this->object = $object;
+    public function connect( $object ) {
         $slug = $object->slug;
         register_rest_route(
             $object->slug,
             'data',
             array(
-                'method'              => \WP_REST_Server::READABLE,
-                'callback'            => array( $this, 'handle'),
+                'method' => \WP_REST_Server::READABLE,
             )
         );
     }
-
-    public function handle(){
-        return $this->object->params;
-    }
-
 }
