@@ -88,9 +88,13 @@ class Data_UI {
      */
     static public function locate_class_file( $class ) {
 
-        $return  = null;
-        $parts   = explode( '\\', strtolower( str_replace( '_', '-', $class ) ) );
-        $name    = 'class-' . strtolower( array_pop( $parts ) ) . '.php';
+        $return = null;
+        $parts  = explode( '\\', strtolower( str_replace( '_', '-', $class ) ) );
+        $prefix = 'class-';
+        if ( in_array( 'traits', $parts, true ) ) {
+            $prefix = 'trait-';
+        }
+        $name    = $prefix . strtolower( array_pop( $parts ) ) . '.php';
         $parts[] = $name;
         $path    = DATAUI_PATH . 'classes/' . implode( '/', $parts );
         if ( file_exists( $path ) ) {

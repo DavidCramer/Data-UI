@@ -3,6 +3,7 @@
 namespace Data_UI\Services;
 
 use Data_UI\UI_Object;
+use Data_UI\Utils;
 
 /**
  * Class UI
@@ -14,15 +15,9 @@ use Data_UI\UI_Object;
  * Class UI
  *
  * @package WP_Services\Services
+ * @property string $service_id The service ID.
  */
-abstract class Service {
-
-    /**
-     * Holds the service Sync ID.
-     *
-     * @var string
-     */
-    protected $service_id;
+abstract class Service extends UI_Object {
 
     /**
      * Holds the service slug.
@@ -32,25 +27,18 @@ abstract class Service {
     protected $slug;
 
     /**
-     * Holds the services subscribable hooks.
+     * Holds the Broadcast object slug.
      *
-     * @var array
+     * @var Broadcast
      */
-    private $service_hooks = array();
+    public $broadcast;
 
     /**
      * Holds the services subscribable hooks.
      *
      * @var array
      */
-    protected $params = array();
-
-    /**
-     * Holds the services unique handlers.
-     *
-     * @var array
-     */
-    private $handlers = array();
+    public $params = array();
 
     /**
      * List of required params this service needs.
@@ -62,72 +50,21 @@ abstract class Service {
     /**
      * Service constructor.
      *
-     * @param string $slug The slug for this service.
+     * @param string $slug The ID/slug for the service.
      */
-    public final function __construct( $slug ) {
-        $this->slug = $slug;
-        $this->service_hooks();
+    public function __construct( $slug = null ) {
+        if ( is_null( $slug ) ) {
+            $slug = spl_object_hash( $this );
+        }
+        parent::__construct( $slug );
+        $this->broadcast = new Broadcast( $slug );
     }
 
     /**
-     * Method called to register service hooks.
+     * Subscribe.
      */
-    protected function service_hooks() {
-        $this->register_service_action( 'init', 'init_service', 10, 1 );
-    }
-
-    /**
-     * Register a service action (does not return).
-     *
-     * @param string          $hook          The hook to register for a service.
-     * @param string|callable $callback      The callable or string name of service method to connect to the service hook.
-     * @param int             $priority      Optional. Used to specify the order in which the functions
-     *                                       associated with a particular action are executed. Default 10.
-     *                                       Lower numbers correspond with earlier execution,
-     *                                       and functions with the same priority are executed
-     *                                       in the order in which they were added to the action.
-     * @param int             $accepted_args Optional. The number of arguments the function accepts. Default 1.
-     */
-    protected final function register_service_action( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
-        $this->register_service_hook( 'action', $hook, $callback, $priority, $accepted_args );
-    }
-
-    /**
-     * Register a service filter (return alters first argument).
-     *
-     * @param string          $hook          The hook to register for a service.
-     * @param string|callable $callback      The callable or string name of service method to connect to the service hook.
-     * @param int             $priority      Optional. Used to specify the order in which the functions
-     *                                       associated with a particular action are executed. Default 10.
-     *                                       Lower numbers correspond with earlier execution,
-     *                                       and functions with the same priority are executed
-     *                                       in the order in which they were added to the action.
-     * @param int             $accepted_args Optional. The number of arguments the function accepts. Default 1.
-     */
-    protected final function register_service_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
-        $this->register_service_hook( 'filter', $hook, $callback, $priority, $accepted_args );
-    }
-
-    /**
-     * Register a service hook.
-     *
-     * @param string          $hook_type     The hook type: filter | action
-     * @param string          $hook          The hook to register for a service.
-     * @param string|callable $callback      The callable or string name of service method to connect to the service hook.
-     * @param int             $priority      Optional. Used to specify the order in which the functions
-     *                                       associated with a particular action are executed. Default 10.
-     *                                       Lower numbers correspond with earlier execution,
-     *                                       and functions with the same priority are executed
-     *                                       in the order in which they were added to the action.
-     * @param int             $accepted_args Optional. The number of arguments the function accepts. Default 1.
-     */
-    protected final function register_service_hook( $hook_type, $hook, $callback, $priority = 10, $accepted_args = 1 ) {
-        $this->service_hooks[ $hook ] = array(
-            'type'          => $hook_type === 'filter' ? 'filter' : 'action',
-            'callback'      => $callback,
-            'priority'      => $priority,
-            'accepted_args' => $accepted_args,
-        );
+    public function subscribe( $event, $callback, $priority = 10 ) {
+        $this->broadcast->subscribe( $event, $callback, $priority );
     }
 
     /**
@@ -156,13 +93,6 @@ abstract class Service {
 
         return isset( $this->params[ $name ] ) ? $this->params[ $name ] : null;
     }
-
-    /**
-     * Service Connection.
-     *
-     * @param Object $object The object to connect to.
-     */
-    public abstract function connect( $object );
 
     /**
      * Check if a param is required.

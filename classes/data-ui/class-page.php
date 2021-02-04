@@ -2,6 +2,9 @@
 
 namespace Data_UI;
 
+use Data_UI\UI\Components\Component\Content;
+use Data_UI\UI\Components\Component\Header;
+
 /**
  * Class Page
  *
@@ -25,13 +28,20 @@ class Page extends Screen {
     protected $page_hook;
 
     /**
+     * Holds the component blueprint.
+     *
+     * @var string
+     */
+    protected $blueprint = 'header/|wrap|content/|/wrap';
+
+    /**
      * Holds the objects Params.
      *
      * @var array
      */
     public $params = array(
-        'parent' => 'admin.php',
-        'capability' => 'manage_options',
+        'parent'     => 'admin.php',
+        'capability' => 'read',
     );
 
     /**
@@ -53,7 +63,7 @@ class Page extends Screen {
      * Admin Init.
      */
     public function admin_init() {
-        $this->ui->get( 'header' )->content = $this->page_title;
+        $this->get( 'header' )->content = $this->page_title;
     }
 
     /**
@@ -66,16 +76,19 @@ class Page extends Screen {
     /**
      * Init the object.
      */
-    public function init() {
-        $blueprint = 'header/|wrap|content/|/wrap';
-        $this->ui->add_blueprint( $blueprint );
-        $this->callback = array( $this, 'render' );
+    protected function setup() {
+        $this->header();
+        parent::setup();
     }
 
     /**
-     * Render the page component as a callback in admin_menu (add_submenu_page).
+     * Add the header component.
      */
-    public function render() {
-        $this->ui->render();
+    protected function header() {
+        // Add components.
+        $header          = new Header( $this->slug . '_header' );
+        $header->content = $this->page_title;
+        $this->add_component( $header );
     }
+
 }

@@ -5,34 +5,54 @@
 
 namespace Data_UI;
 
+use Data_UI\UI\Components\Component\Content;
+
 /**
  * Class Screen
  *
  * @package Data_UI
+ * @property mixed               $data        The data property for this screen.
+ * @property Content             $content     The content component.
+ * @property-read \Data_UI\UI\UI $ui          The UI Controller.
  */
 class Screen extends UI_Object {
 
-    /**
-     * The UI component controller object.
-     *
-     * @var \Data_UI\UI\UI
-     */
-    protected $ui;
+    use \Data_UI\Traits\Components;
 
     /**
-     * UI Object constructor.
+     * Element constructor.
      *
-     * @param string $slug The object slug.
+     * @param string $slug The element type.
      */
-    public function __construct( $slug = null ) {
-        $this->ui = new UI\UI( $slug );
+    public function __construct( $slug ) {
         parent::__construct( $slug );
+        $this->renderer = $this->renderer();
+        $this->setup();
     }
 
     /**
-     * Render the page component as a callback in admin_menu (add_submenu_page).
+     * Init the object.
      */
-    public function render() {
-        $this->ui->render();
+    protected function setup() {
+        $this->content();
+        $this->callback = array( $this, 'render' );
+    }
+
+    /**
+     * Add the content component.
+     */
+    protected function content() {
+        // Add Content component.
+        $this->content = new Content( $this->slug . '_content' );
+        $this->add_component( $this->content );
+    }
+
+    /**
+     * Add a component to the content.
+     *
+     * @param Object $component The  component to add.
+     */
+    public function add_body_component( $component ) {
+        $this->content->add_component( $component );
     }
 }

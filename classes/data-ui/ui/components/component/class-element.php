@@ -2,105 +2,69 @@
 
 namespace Data_UI\UI\Components\Component;
 
+use Data_UI\Screen;
+use Data_UI\UI;
 use Data_UI\UI\Renderer;
+use Data_UI\UI_Object;
+use Data_UI\Utils;
 
 /**
  * Class Element
  *
  * @package Data_UI\UI\Components\Component
- * @property string|array $content The components content.
+ * @property string|array $content    The components content.
+ * @property array        $attributes The components attributes.
+ * @property string       $element    The components element type.
+ * @property string       $type       The component type.
+ * @property string       $state      The component state.
+ * @property string       $service_id The Service ID.
  */
-class Element {
+class Element extends Screen {
 
     /**
-     * Holds the HTML element.
+     * Holds the slug.
      *
      * @var string
      */
-    public $element = 'div';
+    public $slug;
 
     /**
-     * Holds the attributes for the element.
+     * Holds the HTML element type.
+     *
+     * @var string
+     */
+    protected $element = 'div';
+
+    /**
+     * Holds the objects Params.
      *
      * @var array
      */
-    public $attributes = array(
-        'class' => array(
-            'ui-element',
+    public $params = array(
+        'attributes' => array(
+            'class' => array(
+                'ui-element',
+            ),
         ),
+        'content'    => null,
+        'type'       => null,
+        'state'      => null,
     );
-
-    /**
-     * Holds the content.
-     *
-     * @var string
-     */
-    public $content = '';
-
-    /**
-     * Holds the Component type.
-     *
-     * @var string
-     */
-    public $type;
-
-    /**
-     * Holds the component state.
-     *
-     * @var string
-     */
-    public $state;
-    /**
-     * Holds the render instance.
-     *
-     * @var \Data_UI\UI\Renderer
-     */
-    protected $renderer;
-    /**
-     * Holds the components,components.
-     *
-     * @var Element[]
-     */
-    public $components = array();
 
     /**
      * Element constructor.
      *
-     * @param string $element    The element type.
-     * @param array  $attributes Option attributes to pass to the renderer.
+     * @param string $slug The element type.
      */
-    public final function __construct( $element = 'div', $attributes = array() ) {
-        $class_parts      = explode( '\\', strtolower( __CLASS__ ) );
-        $this->type       = array_pop( $class_parts );
-        $this->element    = $element;
-        $this->attributes = array_merge_recursive( $this->attributes, $attributes );
-        $this->renderer   = $this->renderer();
+    public final function __construct( $slug ) {
+        $this->type = Utils::classname( get_called_class() );
+        parent::__construct( $slug );
     }
 
     /**
-     * Add a component.
-     *
-     * @param Element $component Component to add.
+     * Pre-render setup.
      */
-    public function add_component( $component ) {
-        if ( $component instanceof Element ) {
-            $this->components[] = $component;
-        }
-    }
-
-    /**
-     * Gets the component renderer.
-     *
-     * @return Renderer|callable
-     */
-    protected function renderer() {
-        return new Renderer();
-    }
-
-    /**
-     * Setup the component.
-     */
-    public function setup() {
+    public function pre_render() {
         $this->renderer->element               = $this->element;
         $this->renderer->type                  = $this->type;
         $this->renderer->attributes            = $this->attributes;
@@ -113,9 +77,8 @@ class Element {
      * @return string
      */
     protected function content() {
-        $html = array(
-            $this->content,
-        );
+
+        $html = (array) $this->content;
         foreach ( $this->components as $component ) {
             $html[] = $component->render();
         }
@@ -127,9 +90,30 @@ class Element {
      * Placeholder component - when a requested component does not exist.
      */
     public function render() {
-        $this->setup();
+        $this->pre_render();
         $this->renderer->set_content( $this->content() );
 
         return $this->renderer->render();
+    }
+
+    /**
+     * Set a param.
+     *
+     * @param $name
+     * @param $value
+     */
+    public function __set( $name, $value ) {
+        $this->params[ $name ] = $value;
+    }
+
+    /**
+     * Get a param.
+     *
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function __get( $name ) {
+        return isset( $this->params[ $name ] ) ? $this->params[ $name ] : null;
     }
 }

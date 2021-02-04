@@ -2,32 +2,24 @@
 
 namespace Data_UI;
 
-use Data_UI\Services\Dispatch;
-use Data_UI\Services\Service;
+use Data_UI\Traits\Broadcast;
 
 /**
  * Class UI
  *
  * @package UI_Object
- * @property string $service_id    The unique service ID.
- * @property array  $service_hooks The service specific event subscriptions.
- * @property string $slug          The objects slug.
+ * @property string $broadcast_id    The boradcast ID to subscribe to events..
+ * @property array  $service_hooks   The service specific event subscriptions.
+ * @property string $slug            The object Slug.
  */
-abstract class UI_Object {
+abstract class UI_Object extends UI {
 
     /**
-     * Holds the objects Params.
+     * Broadcast object.
      *
-     * @var array
+     * @var Broadcast
      */
-    public $params = array();
-
-    /**
-     * Holds the attached objects.
-     *
-     * @var UI_Object[]
-     */
-    protected $objects = array();
+    public $broadcast;
 
     /**
      * UI Object constructor.
@@ -35,9 +27,18 @@ abstract class UI_Object {
      * @param string $slug The object slug.
      */
     public function __construct( $slug = null ) {
-        $this->slug = $slug;
+        parent::__construct( $slug );
+        $this->broadcast = new \Data_UI\Services\Broadcast( $this->slug );
         $this->setup_hooks();
-        $this->init();
+        $this->setup();
+        add_action( 'init', array( $this, 'init' ) );
+    }
+
+    /**
+     * Setup object
+     */
+    protected function setup() {
+
     }
 
     /**
@@ -50,13 +51,14 @@ abstract class UI_Object {
     /**
      * Init object.
      */
-    protected function init() {
+    public function init() {
     }
 
     /**
      * Admin Init.
      */
     public function admin_init() {
+        $this->broadcast->event( 'admin_init', $this );
     }
 
     /**
@@ -83,31 +85,16 @@ abstract class UI_Object {
     /**
      * Attach an object.
      *
-     * @param Service
-     */
-    public function attach_service( $service ) {
-        if ( $service instanceof Service ) {
-            $this->service_id = spl_object_hash( $this );
-            $hooks            = $service->connect( $this );
-            $dispatch         = new Dispatch( $this );
-            foreach ( $hooks as $hook => $event ) {
-                add_action( $hook, array( $dispatch, $event ) );
-            }
-        }
-    }
-
-    /**
-     * Attach an object.
+     * @param UI $object The object to attach.
      *
-     * @param $object
-     *
-     * @return UI_Object
+     * @return bool
      */
     public function attach( $object ) {
-        if ( $object instanceof UI_Object && ! in_array( $object, $this->objects, true ) ) {
-            $this->objects[] = $object;
+        $attached = parent::attach( $object );
+        if ( $attached ) {
+            $object->broadcast_id = $this->slug;
         }
 
-        return $object;
+        return $attached;
     }
 }

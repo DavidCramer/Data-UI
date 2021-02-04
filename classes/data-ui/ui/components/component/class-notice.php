@@ -15,13 +15,6 @@ use Data_UI\UI\Components\Component;
 class Notice extends Element {
 
     /**
-     * Holds the HTML element.
-     *
-     * @var string
-     */
-    public $element = 'div';
-
-    /**
      * The level of the notice.
      *
      * @var string
@@ -45,8 +38,8 @@ class Notice extends Element {
     /**
      * Setup the component.
      */
-    public function setup() {
-        parent::setup();
+    public function pre_render() {
+        parent::pre_render();
         $this->renderer->attributes['class'] = array(
             'notice',
             "notice-{$this->level}",

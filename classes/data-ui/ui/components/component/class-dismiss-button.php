@@ -5,8 +5,6 @@
 
 namespace Data_UI\UI\Components\Component;
 
-use Data_UI\UI\Components\Component;
-
 /**
  * Class Notice
  *
@@ -24,8 +22,8 @@ class Dismiss_Button extends Element {
     /**
      * Setup the component.
      */
-    public function setup() {
-        parent::setup();
+    public function pre_render() {
+        parent::pre_render();
         $this->renderer->attributes['type']  = 'button';
         $this->renderer->attributes['class'] = array(
             'notice-dismiss',
@@ -36,7 +34,8 @@ class Dismiss_Button extends Element {
                 'screen-reader-text',
             ),
         );
-        $content          = new Element( 'span', $args );
+        $content          = new Element( $this->slug . '_dismiss' );
+        $content->element = 'span';
         $content->content = 'Dismiss this notice.';
         $this->add_component( $content );
     }

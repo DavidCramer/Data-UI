@@ -7,12 +7,22 @@ namespace Data_UI;
  *
  * @package Data_UI
  * @property string          $group_title The group title shown on the menu.
+ * @property string          $parent      The parent node id.
  * @property string          $capability  The capability to access the group.
  * @property string          $icon        The URL or dashicon to use on the menu.
  * @property string|callable $callback    The callback to render the page.
  * @property int             $position    The group position on the menu.
  */
 class Admin_Bar_Node extends Page {
+
+    /**
+     * Holds the objects Params.
+     *
+     * @var array
+     */
+    public $params = array(
+        'parent'     => null,
+    );
 
     /**
      * Setup hooks.
@@ -30,8 +40,9 @@ class Admin_Bar_Node extends Page {
 
         $wp_admin_bar->add_node(
             [
-                'id'    => $this->slug,
-                'title' => $this->group_title,
+                'id'     => $this->slug,
+                'parent' => $this->parent,
+                'title'  => $this->group_title,
             ]
         );
 
